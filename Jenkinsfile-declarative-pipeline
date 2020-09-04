@@ -1,0 +1,18 @@
+pipeline{
+    environment{
+      PATH = "/opt/maven/bin:$PATH"
+    }
+    agent any 
+    stages{
+        stage("Git Checkout"){
+            steps{
+                git 'https://github.com/joelarnaud/code2021.git'
+            }
+        }
+        stage("Maven Build"){
+            steps{
+                sh "mvn clean package"
+            }
+        }
+    }
+}
