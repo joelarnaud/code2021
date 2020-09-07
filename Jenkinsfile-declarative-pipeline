@@ -1,27 +1,29 @@
 pipeline{
-    environment{
-      PATH = "/opt/maven/bin:$PATH"
-    }
     agent any 
+    Parameters{
+	choice(name: 'VERSION', choices: ['1.2.0', '1.2.1', '1.2.2'], description: '')
+	booleanParam(name: 'executeTests', defaultValue: 'True', description: '')
+    }
     stages{
-        stage("Git Checkout"){
+        stage("Build"){
             steps{
-                git 'https://github.com/joelarnaud/code2021.git'
+               echo "building the application ... "
             }
         }
-        stage("Maven Build"){
+        stage("Test"){
+            when{
+                expression{
+                    params.executeTests == true
+                }
+            }
             steps{
-                sh "mvn clean package"
+                echo " testing the application ..."
             }
         }
         stage("Deploy"){
             steps{
-                sshagent(['tomcat']) {
-                   sh """
-                      scp -o StrictHostKeyChecking=no target/code2021.war ec2-user@172.31.0.60:/opt/tomcat/webapps/
-                      ssh ec2-user@172.31.0.60 /opt/tomcat/bin/shutwown.sh
-                      ssh ec2-user@172.31.0.60 /opt/tomcat/bin/startup.sh
-                   """
+               echo "deploying the application ..."
+               echo "deploying application ${params.VERSION}"
                 }
             }
         }
